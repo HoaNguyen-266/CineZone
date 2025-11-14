@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "303460523060",
+    "firebase_url": "https://cinezone-6b2d6-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "cinezone-6b2d6",
+    "storage_bucket": "cinezone-6b2d6.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:303460523060:android:9861563f7628fe77f43e61",
+        "android_client_info": {
+          "package_name": "com.example.project_team"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDVG70FIuSDIyGHXDyuMEpiacL7URsyIEg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
