@@ -3,8 +3,9 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_options.dart';
-
+import 'profile.dart';
 final database = FirebaseDatabase.instance.ref();
 
 void main() async {
@@ -332,10 +333,18 @@ class SignUpScreen extends StatelessWidget {
 }
 
 // MAIN HOME PAGE
-class MovieHomePage extends StatelessWidget {
+class MovieHomePage extends StatefulWidget {
   final VoidCallback toggleTheme;
   MovieHomePage({required this.toggleTheme});
 
+  @override
+  State<MovieHomePage> createState() => _MovieHomePageState();
+}
+
+class _MovieHomePageState extends State<MovieHomePage> {
+  int _selectedIndex = 0;
+
+  // Giữ nguyên các danh sách phim và hàm movieGridItem
   final List<Movie> featuredMovies = [
     Movie('Trận Chiến Sau Tranh Chiến',
         'assets/images/tranchiensautranchien.jpg',7.6,120,'26/09/2025',
@@ -417,14 +426,206 @@ class MovieHomePage extends StatelessWidget {
     Movie('ai Thương ai Mến', 'assets/images/aithuongaimen.jpg',0.0,000,'01/01/2026','',[{'name': 'Dien vien', 'avatar': 'asset'}],{'name': 'Dao dien', 'avatar': ''}),
   ];
 
-  @override
-  Widget build(BuildContext context) {
+  // Hàm xây dựng nội dung Trang Chủ (Được tách ra từ hàm build cũ)
+  Widget _buildHomeScreenContent(BuildContext context) {
     return DefaultTabController(
       length: 2,
-      child: Scaffold(
+      child: Column(
+        children: [
+          // Banner nổi bật
+          Container(
+            color: const Color(0xFF6E3AA7),
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 18.0),
+                  child: Text(
+                    'Nổi bật',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  height: 255,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: featuredMovies.length,
+                    itemBuilder: (context, index){
+                      final movie = featuredMovies[index];
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 16.0),
+                        child: Stack(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(14),
+                              child: Image.asset(
+                                movie.imagePath,
+                                width: 210,
+                                height: 255,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            Positioned(
+                              bottom: 10,
+                              left: 15,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    movie.title,
+                                    style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 19,
+                                        fontWeight: FontWeight.bold,
+                                        shadows: [
+                                          Shadow(color: Colors.black, blurRadius: 1)
+                                        ]),
+                                  ),
+                                  const Text(
+                                    '1 tiếng 59 phút',
+                                    style: TextStyle(color: Colors.white70, fontSize: 14),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Positioned(
+                              top: 0,
+                              left: 0,
+                              child: Container(
+                                alignment: Alignment.center,
+                                width: 34,
+                                height: 34,
+                                decoration: const BoxDecoration(
+                                    color: Color.fromRGBO(0, 0, 0, 0.7),
+                                    borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(14),
+                                      bottomRight: Radius.circular(14),
+                                    )
+                                ),
+                                child: Text(
+                                  "${index + 1}",
+                                  style: const TextStyle(color: Colors.yellowAccent,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 20
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Positioned(
+                              bottom: 12,
+                              right: 16,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.red,
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8))),
+                                onPressed: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(builder: (context) => MovieBookingPage(movie: movie),
+                                    ),
+                                  );
+                                },
+                                child: const Text('Đặt vé',
+                                    style: TextStyle(color: Colors.white)),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 8),
+              ],
+            ),
+          ),
+          // TabBar
+          const TabBar(
+            indicatorColor: Colors.purple,
+            labelColor: Colors.purple,
+            unselectedLabelColor: Colors.black,
+            tabs: [
+              Tab(text: 'Đang chiếu'),
+              Tab(text: 'Sắp chiếu'),
+            ],
+          ),
+          // TabBarView
+          Expanded(
+            child: TabBarView(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(9),
+                  child: GridView.count(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 14,
+                    childAspectRatio: 0.68,
+                    children: movies.map((movie) => movieGridItem(movie, context)).toList(),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(9),
+                  child: GridView.count(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 14,
+                    childAspectRatio: 0.68,
+                    children: moviesComingSoon.map((movie) => movieGridItem(movie, context)).toList(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Xem thêm Button
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4.0),
+            child: SizedBox(
+              width: double.infinity,
+              child: TextButton(
+                onPressed: (){},
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  side: BorderSide(color: Colors.grey.shade300),
+                ),
+                child: const Text(
+                  'Xem thêm',
+                  style: TextStyle(color: Colors.black, fontSize: 16),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Danh sách các màn hình (Tab Trang Chủ và Tab Cá Nhân)
+  late final List<Widget> _screens = [
+    _buildHomeScreenContent(context),
+    ProfileScreen(toggleTheme: widget.toggleTheme),
+  ];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // AppBar chỉ hiển thị ở Trang Chủ, khi ở trang Cá Nhân thì dùng AppBar riêng của nó
+    return Scaffold(
         backgroundColor: Colors.white,
         appBar: PreferredSize(
-          preferredSize: Size.fromHeight(68.0),
+          preferredSize: const Size.fromHeight(68.0),
           child: AppBar(
             backgroundColor: Colors.white,
             elevation: 0,
@@ -434,7 +635,7 @@ class MovieHomePage extends StatelessWidget {
               child: Text(
                 'CINEZONE',
                 style: GoogleFonts.robotoSerif(
-                  textStyle: TextStyle(
+                  textStyle: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 2,
@@ -445,191 +646,35 @@ class MovieHomePage extends StatelessWidget {
             ),
           ),
         ),
-        body: Column(
-          children: [
-            Container(
-              color: Color(0xFF6E3AA7),
-              width: double.infinity,
-              padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 18.0),
-                    child: Text(
-                      'Nổi bật',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 17,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 12),
-                  SizedBox(
-                    height: 255,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      padding: EdgeInsets.symmetric(horizontal: 16),
-                      itemCount: featuredMovies.length,
-                      itemBuilder: (context, index){
-                        final movie = featuredMovies[index];
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 16.0),
-                          child: Stack(
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(14),
-                                child: Image.asset(
-                                  movie.imagePath,
-                                  width: 210,
-                                  height: 255,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                              Positioned(
-                                bottom: 10,
-                                left: 15,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      movie.title,
-                                      style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 19,
-                                          fontWeight: FontWeight.bold,
-                                          shadows: [
-                                            Shadow(color: Colors.black, blurRadius: 1)
-                                          ]),
-                                    ),
-                                    Text(
-                                      '1 tiếng 59 phút',
-                                      style: TextStyle(color: Colors.white70, fontSize: 14),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Positioned(
-                                top: 0,
-                                left: 0,
-                                child: Container(
-                                  alignment: Alignment.center,
-                                  width: 34,
-                                  height: 34,
-                                  decoration: BoxDecoration(
-                                      color: Color.fromRGBO(0, 0, 0, 0.7),
-                                      borderRadius: BorderRadius.only(
-                                        topLeft: Radius.circular(14),
-                                        bottomRight: Radius.circular(14),
-                                      )
-                                  ),
-                                  child: Text(
-                                    "${index + 1}",
-                                    style: TextStyle(color: Colors.yellowAccent,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 20
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              Positioned(
-                                bottom: 12,
-                                right: 16,
-                                child: ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.red,
-                                      shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(8))),
-                                  onPressed: () {
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(builder: (context) => MovieBookingPage(movie: movie),
-                                      ),
-                                    );
-                                  },
-                                  child: Text('Đặt vé',
-                                      style: TextStyle(color: Colors.white)),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                ],
-              ),
-            ),
-            TabBar(
-              indicatorColor: Colors.purple,
-              labelColor: Colors.purple,
-              unselectedLabelColor: Colors.black,
-              tabs: [
-                Tab(text: 'Đang chiếu'),
-                Tab(text: 'Sắp chiếu'),
-              ],
-            ),
-            Expanded(
-              child: TabBarView(
-                children: [
-                  Padding(
-                    padding: EdgeInsets.all(9),
-                    child: GridView.count(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 10,
-                      mainAxisSpacing: 14,
-                      childAspectRatio: 0.68,
-                      children: movies.map((movie) => movieGridItem(movie, context)).toList(),
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.all(9),
-                    child: GridView.count(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 10,
-                      mainAxisSpacing: 14,
-                      childAspectRatio: 0.68,
-                      children: moviesComingSoon.map((movie) => movieGridItem(movie, context)).toList(),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: 4.0),
-              child: SizedBox(
-                width: double.infinity,
-                child: TextButton(
-                  onPressed: (){},
-                  style: TextButton.styleFrom(
-                    padding: EdgeInsets.symmetric(vertical: 12),
-                    side: BorderSide(color: Colors.grey),
-                  ),
-                  child: Text(
-                    'Xem thêm',
-                    style: TextStyle(color: Colors.black, fontSize: 16),
-                  ),
-                ),
-              ),
-            ),
-            Container(
-              height: 56,
-              decoration: BoxDecoration(
-                border: Border(top: BorderSide(color: Colors.grey.shade200)),
-                color: Colors.white,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _BottomNavItem(icon: Icons.home, label: 'Trang Chủ', selected: true),
-                  _BottomNavItem(icon: Icons.person, label: 'Cá Nhân', selected: false),
-                ],
-              ),
-            )
-          ],
+        body: IndexedStack(
+          index: _selectedIndex,
+          children: _screens,
         ),
-      ),
+        // Bottom Navigation Bar
+        bottomNavigationBar: Container(
+          height: 56,
+          decoration: BoxDecoration(
+            border: Border(top: BorderSide(color: Colors.grey.shade200)),
+            color: Theme.of(context).cardColor,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _BottomNavItem(
+                  icon: Icons.home,
+                  label: 'Trang Chủ',
+                  selected: _selectedIndex == 0,
+                  onTap: () => _onItemTapped(0)
+              ),
+              _BottomNavItem(
+                  icon: Icons.person,
+                  label: 'Cá Nhân',
+                  selected: _selectedIndex == 1,
+                  onTap: () => _onItemTapped(1)
+              ),
+            ],
+          ),
+        )
     );
   }
 
@@ -653,10 +698,10 @@ class MovieHomePage extends StatelessWidget {
               ),
             ),
           ),
-          SizedBox(height: 7),
+          const SizedBox(height: 7),
           Text(
             movie.title,
-            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
             textAlign: TextAlign.center,
           )
         ],
@@ -1023,22 +1068,26 @@ class _BottomNavItem extends StatelessWidget {
   final IconData icon;
   final String label;
   final bool selected;
+  final VoidCallback onTap;
 
   const _BottomNavItem(
-  {required this.icon, required this.label, required this.selected});
+      {required this.icon, required this.label, required this.selected, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(icon, color: selected ? Colors.purple.shade900 : Colors.grey.shade600,
-        size: 26,
-        ),
-        Text(label, style: TextStyle(fontSize: 10, color: selected ? Colors.purple.shade900 : Colors.grey.shade600,
-        ),
-        )
-      ],
+    return InkWell(
+      onTap: onTap,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: selected ? Colors.purple.shade900 : Colors.grey.shade600,
+            size: 26,
+          ),
+          Text(label, style: TextStyle(fontSize: 10, color: selected ? Colors.purple.shade900 : Colors.grey.shade600,
+          ),
+          )
+        ],
+      ),
     );
   }
 }

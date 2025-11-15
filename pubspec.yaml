@@ -35,6 +35,7 @@ dependencies:
   google_fonts: ^6.1.0
   cloud_firestore: 6.0.3
   firebase_core: ^4.2.1
+  firebase_auth: ^6.1.2
   firebase_database: ^12.0.4
   intl: ^0.18.1
 
