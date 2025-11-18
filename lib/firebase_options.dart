@@ -67,4 +67,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'cinezone-6b2d6.firebasestorage.app',
     iosBundleId: 'com.example.projectTeam',
   );
+
 }
