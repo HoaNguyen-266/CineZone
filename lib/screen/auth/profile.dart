@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart'; // Thêm nếu cần dùng database
-
+import 'package:project_team/screen/profile/my_tickets.dart';
 // 1. Định nghĩa Class MenuItem và dữ liệu
 class MenuItem {
   final IconData icon;
@@ -40,15 +39,11 @@ class ProfileScreen extends StatelessWidget {
     return InkWell(
       onTap: () async {
         if (item.isLogout) {
-          // Xử lý đăng xuất Firebase
           await FirebaseAuth.instance.signOut();
-          // Điều hướng về màn hình Login và xóa hết các màn hình trước đó
           Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
-        } else if (item.screen == 'AppSettings') {
-          // Ví dụ: Sử dụng Toggle Theme cho Cài Đặt Ứng Dụng
-          toggleTheme();
-          ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Đã chuyển đổi giao diện!'))
+        } else if (item.screen == 'MyTickets') {
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const MyTicketsScreen()),
           );
         } else {
           // Xử lý điều hướng đến các màn hình khác

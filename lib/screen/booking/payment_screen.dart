@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:project_team/models/booking_details.dart'; // Import Model
 import 'package:project_team/screen/booking/payment_result_screen.dart'; // Import màn hình kế tiếp
+import 'package:project_team/services/firestore_service.dart';
+import 'package:project_team/models/transaction_history.dart';
 
 class PaymentScreen extends StatefulWidget{
   final BookingDetails bookingDetails;
@@ -33,17 +35,22 @@ class _PaymentScreenState extends State<PaymentScreen> {
     // --- Mô phỏng Thanh toán ---
     await Future.delayed(const Duration(milliseconds: 500));
     const bool paymentSuccess = true;
-
+    final transactionId = 'TXN${DateTime.now().millisecondsSinceEpoch}';
+    final transaction = TransactionHistory(
+      bookingDetails: widget.bookingDetails,
+      paymentMethod: _selectedPaymentMethod!,
+      isSuccess: paymentSuccess,
+      transactionId: transactionId,
+    );
+    await uploadTransaction(transaction);
     if (paymentSuccess) {
-      final bookingDetails = widget.bookingDetails;
-      await uploadBooking(bookingDetails);
       Navigator.pushReplacement(context,
           MaterialPageRoute(
               builder: (context)=> PaymentResultScreen(
-                  bookingDetails: bookingDetails,
+                  bookingDetails: widget.bookingDetails,
                   paymentMethod: _selectedPaymentMethod!,
-                  isSuccess: true,
-                  transactionId: 'TXN${DateTime.now().millisecondsSinceEpoch}',
+                  isSuccess: paymentSuccess,
+                  transactionId: transactionId,
               ),
           ),
       );
