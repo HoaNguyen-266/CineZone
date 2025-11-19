@@ -1,5 +1,4 @@
-// lib/screens/booking/payment_screen.dart
-
+import 'package:project_team/services/firestore_uploader.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:project_team/models/booking_details.dart'; // Import Model
@@ -36,17 +35,17 @@ class _PaymentScreenState extends State<PaymentScreen> {
     const bool paymentSuccess = true;
 
     if (paymentSuccess) {
-      // Chuyển sang màn hình Kết Quả Thanh Toán
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => PaymentResultScreen(
-            bookingDetails: widget.bookingDetails,
-            paymentMethod: _selectedPaymentMethod!,
-            isSuccess: true,
-            transactionId: 'TXN${DateTime.now().millisecondsSinceEpoch}',
+      final bookingDetails = widget.bookingDetails;
+      await uploadBooking(bookingDetails);
+      Navigator.pushReplacement(context,
+          MaterialPageRoute(
+              builder: (context)=> PaymentResultScreen(
+                  bookingDetails: bookingDetails,
+                  paymentMethod: _selectedPaymentMethod!,
+                  isSuccess: true,
+                  transactionId: 'TXN${DateTime.now().millisecondsSinceEpoch}',
+              ),
           ),
-        ),
       );
     } else {
       // Xử lý thất bại

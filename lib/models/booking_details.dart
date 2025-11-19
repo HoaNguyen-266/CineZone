@@ -12,4 +12,14 @@ class BookingDetails {
     required this.seats,
     required this.totalAmount,
   });
+
+  Map<String, dynamic> toJson(){
+    return {
+      'movieTitle': movieTitle,
+      'showtime': showtime,
+      'seats': seats,
+      'totalAmount': totalAmount,
+      'timestamp': DateTime.now().toIso8601String(),
+    };
+  }
 }
